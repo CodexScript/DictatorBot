@@ -1,0 +1,25 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.6.0'
+}
+
+group 'com.github.codexscript'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+    maven { url "https://m2.chew.pro/releases" }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.0'
+    implementation("net.dv8tion:JDA:4.3.0_346")
+    implementation("pw.chew:jda-chewtils:1.23.0")
+    implementation('com.squareup.okhttp3:okhttp:4.9.2')
+    implementation('ch.qos.logback:logback-classic:1.2.7')
+    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
+    implementation("com.mastfrog:jackson:2.7.3")
+}
