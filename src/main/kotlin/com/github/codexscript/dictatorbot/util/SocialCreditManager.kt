@@ -14,25 +14,6 @@ import java.sql.Connection
 import java.sql.DriverManager
 import javax.imageio.ImageIO
 
-enum class SocialCreditTier {
-    D,
-    C,
-    B,
-    AMINUS {
-        override fun toString(): String {
-            return "A-"
-        }
-           },
-    A,
-    APLUS {
-        override fun toString(): String {
-            return "A+"
-        }
-          },
-    AA,
-    AAA
-}
-
 class SocialCreditManager {
     companion object {
         private val font = Font.createFont(Font.TRUETYPE_FONT, SocialCreditManager::class.java.getResourceAsStream("/font/seven-monkey-fury-bb.regular.ttf")).deriveFont(Font.PLAIN, 72f)

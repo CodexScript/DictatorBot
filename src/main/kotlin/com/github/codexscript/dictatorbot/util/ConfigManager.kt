@@ -7,13 +7,16 @@ import java.io.File
 class ConfigManager {
     companion object {
         private val LOG = LoggerFactory.getLogger(ConfigManager::class.java)
-        private val configPath = System.getProperty("user.dir") + "/data/config.json"
+        private val configFolder = System.getProperty("user.dir") + "/data/"
         private val config = File(System.getProperty("user.dir") + "/data/config.json")
 
         private fun createDefaultConfig(): Map<*, *> {
-            LOG.debug("Creating default config at $configPath")
+            LOG.debug("Creating default config at ${config.path}")
             val default = ConfigManager::class.java.getResource("/config_default.json").readText()
-            File(configPath).writeText(default)
+            if (File(configFolder).mkdirs()) {
+                LOG.debug("Created config folder at $configFolder")
+            }
+            File(config.path).writeText(default)
             val mapper = ObjectMapper()
             return mapper.readValue(default, Map::class.java)
         }
