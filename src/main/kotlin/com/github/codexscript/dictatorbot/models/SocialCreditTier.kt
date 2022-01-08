@@ -1,4 +1,4 @@
-package com.github.codexscript.dictatorbot.util
+package com.github.codexscript.dictatorbot.models
 
 enum class SocialCreditTier {
     D,

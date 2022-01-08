@@ -1,5 +1,6 @@
 package com.github.codexscript.dictatorbot.util
 
+import com.github.codexscript.dictatorbot.models.SocialCreditTier
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -20,10 +21,6 @@ class SocialCreditManager {
         private val LOG = LoggerFactory.getLogger(SocialCreditManager::class.java)
 
         private val connection = DriverManager.getConnection("jdbc:sqlite:data/social_credit.db")
-
-        fun getConnection(): Connection {
-            return connection
-        }
 
         fun ensureDatabase() {
             LOG.debug("Ensuring database")
@@ -61,26 +58,44 @@ class SocialCreditManager {
             stmt.execute()
         }
 
-        fun setSocialCredit(event: GenericInteractionCreateEvent, reasons: List<String>, socialCredit: Int) {
+        fun setSocialCredit(event: GenericInteractionCreateEvent, reasons: List<String>, socialCredit: Int, reply: Boolean = true) {
             setSocialCredit(event.user.id, socialCredit)
 
             var reasonString = "Your new social credit score: ${if (socialCredit >= 0) socialCredit else 0}"
 
             if (reasons.isNotEmpty()) {
                 reasonString += "\nReasons:\n> ${reasons.joinToString("\n> ")}"
-                event.reply(reasonString).queue()
+                if (reply) {
+                    event.reply(reasonString).queue()
+                } else {
+                    reasonString = event.user.asMention + " " + reasonString
+                    event.messageChannel.sendMessage(reasonString).queue()
+                }
             }
         }
 
-        fun setSocialCredit(event: MessageReceivedEvent, reasons: List<String>, socialCredit: Int) {
+        fun setSocialCredit(event: MessageReceivedEvent, reasons: List<String>, socialCredit: Int, reply: Boolean = true) {
             setSocialCredit(event.author.id, socialCredit)
 
             var reasonString = "Your new social credit score: ${if (socialCredit >= 0) socialCredit else 0}"
 
             if (reasons.isNotEmpty()) {
                 reasonString += "\nReasons:\n> ${reasons.joinToString("\n> ")}"
-                event.message.reply(reasonString).queue()
+                if (reply) {
+                    event.message.reply(reasonString).queue()
+                } else {
+                    reasonString = event.author.asMention + " " + reasonString
+                    event.channel.sendMessage(reasonString).queue()
+                }
             }
+        }
+
+        fun addSocialCredit(userId: String, socialCredit: Int) {
+            if (socialCredit == 0) {
+                return
+            }
+            val currentSocialCredit = getSocialCredit(userId)
+            setSocialCredit(userId, currentSocialCredit + socialCredit)
         }
 
         fun getSocialCreditTier(socialCredit: Int): SocialCreditTier {

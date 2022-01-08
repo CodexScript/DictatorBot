@@ -33,7 +33,7 @@ class SocialCreditMod : SlashCommand() {
                 }
 
                 if (!event.member?.isOwner!!) {
-
+                    event.reply("You are not President Xi!").queue()
                     return
                 }
 

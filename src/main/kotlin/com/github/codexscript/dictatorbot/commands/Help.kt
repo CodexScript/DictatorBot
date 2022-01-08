@@ -24,6 +24,13 @@ class Help : SlashCommand() {
             |Use `/socialcredit` to see your current score and tier
             |Use `/tiers` to see the different tiers and their score ranges
             |
+            |__Music__
+            |`/play` to play music
+            |`/skip` to skip the current song
+            |`/clear` to clear the queue
+            |`/queue` to see the current queue
+            |`/volume` to change the volume
+            |
             |__Other Commands__
             |Use `/soygrimes` to edit a given image to be behind the soy grimes picture
             |Use `/help` to see this message

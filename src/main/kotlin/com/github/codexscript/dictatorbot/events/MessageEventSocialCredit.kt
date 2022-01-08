@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory
 
 class MessageEventSocialCredit : ListenerAdapter() {
     private val LOG = LoggerFactory.getLogger(MessageEventSocialCredit::class.java)
-    private val phrases: Map<String, Int> = ConfigManager.getConfigContent()["social_credit_phrases"] as Map<String, Int>
-    private val phrasesRegex: Map<String, Int> = ConfigManager.getConfigContent()["social_credit_regex"] as Map<String, Int>
+    private val phrases: Map<String, Int> = ConfigManager.getConfigContent().socialCreditPhrases
+    private val phrasesRegex: Map<String, Int> = ConfigManager.getConfigContent().socialCreditRegex
     override fun onMessageReceived(event: MessageReceivedEvent) {
         super.onMessageReceived(event)
 

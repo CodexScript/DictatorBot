@@ -1,0 +1,14 @@
+ownerID: "123456789012345678"
+lavalinkIP: "127.0.0.1"
+lavalinkPort: "2333"
+lavalinkPassword: "password"
+socialCreditPhrases:
+  "Winnie the Pooh": -10
+  "Glory to the CCP": 10
+  "Taiwan": -50
+socialCreditRegex:
+  "(Tiananmen.Square.((protest)|(massacre)|(incident)))": -100
+tiktok:
+  xKhronos: "123456789"
+  xGorgon: "1234abcd"
+  cookie: "yum"
