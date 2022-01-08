@@ -15,6 +15,11 @@ class ResetFilters : SlashCommand() {
             return
         }
 
+        if (!Bot.musicController.isLinkActive(event.guild!!)) {
+            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            return
+        }
+
         val filters = Bot.musicController.getGuildMusicManager(event.textChannel).link.player.filters
         filters.clear()
         filters.commit()

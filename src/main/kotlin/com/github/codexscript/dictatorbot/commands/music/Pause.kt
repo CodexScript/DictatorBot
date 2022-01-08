@@ -14,6 +14,7 @@ class Pause : SlashCommand() {
         if (event == null) {
             return
         }
+
         val link = Bot.lavalink.getLink(event.guild)
         link.player.isPaused = true
         event.reply("Paused.").queue()

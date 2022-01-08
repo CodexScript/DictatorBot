@@ -14,6 +14,7 @@ class Queue : SlashCommand() {
         if (event == null || event.guild == null) {
             return
         }
+
         val queue = Bot.musicController.getGuildMusicManager(event.textChannel).scheduler.queue
         if (queue.isEmpty()) {
             event.reply("Queue is empty").setEphemeral(true).queue()

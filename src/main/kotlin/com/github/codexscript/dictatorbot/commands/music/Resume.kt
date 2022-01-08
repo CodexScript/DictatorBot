@@ -14,6 +14,7 @@ class Resume : SlashCommand() {
         if (event == null) {
             return
         }
+
         val link = Bot.lavalink.getLink(event.guild)
         link.player.isPaused = false
         event.reply("Resumed.").queue()

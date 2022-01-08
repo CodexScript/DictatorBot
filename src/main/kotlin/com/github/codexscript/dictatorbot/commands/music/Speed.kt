@@ -19,6 +19,12 @@ class Speed : WorkerOwnedSlashCommand() {
         if (event == null) {
             return
         }
+
+        if (!Bot.musicController.isLinkActive(event.guild!!)) {
+            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            return
+        }
+
         val speed = event.getOption("speed")?.asLong
         val realSpeed = speed?.div(100f)
         val link = Bot.lavalink.getLink(event.guild)

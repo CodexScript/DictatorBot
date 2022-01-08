@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import lavalink.client.io.Link
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
 import java.net.URI
@@ -93,5 +94,9 @@ class MusicController {
         }
 
         return musicManager
+    }
+
+    fun isLinkActive(guild: Guild) : Boolean {
+        return musicManagers.containsKey(guild.idLong)
     }
 }

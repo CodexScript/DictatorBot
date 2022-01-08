@@ -17,11 +17,17 @@ class Volume : SlashCommand() {
         if (event == null) {
             return
         }
+
+        if (!Bot.musicController.isLinkActive(event.guild!!)) {
+            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            return
+        }
+
         val volume = event.getOption("volume")?.asLong
         val link = Bot.lavalink.getLink(event.guild)
         if (volume != null) {
-            if (volume <= 0 || volume > 500) {
-                event.reply("Volume must be 0 < vol <= 500.").setEphemeral(true).queue()
+            if (volume <= 0 || volume > 1000) {
+                event.reply("Volume must be 0 < vol <= 1000.").setEphemeral(true).queue()
                 return
             }
             link.player.volume = volume.toInt()

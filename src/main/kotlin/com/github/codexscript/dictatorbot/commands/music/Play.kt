@@ -2,6 +2,7 @@ package com.github.codexscript.dictatorbot.commands.music
 
 import com.github.codexscript.dictatorbot.Bot
 import com.github.codexscript.dictatorbot.models.WorkerOwnedSlashCommand
+import lavalink.client.io.filters.Distortion
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData

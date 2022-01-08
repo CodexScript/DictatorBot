@@ -20,6 +20,15 @@ class Pitch : WorkerOwnedSlashCommand() {
             return
         }
 
+        if (event.isAcknowledged || event.member == null) {
+            return
+        }
+
+        if (!Bot.musicController.isLinkActive(event.guild!!)) {
+            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            return
+        }
+
         val pitch = event.getOption("pitch")?.asLong
         val realPitch = pitch?.div(100f)
 

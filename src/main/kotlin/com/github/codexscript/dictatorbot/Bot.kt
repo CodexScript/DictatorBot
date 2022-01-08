@@ -44,9 +44,13 @@ class Bot(token: String)  {
                 Speed(),
                 Pitch(),
                 BassBoost(),
+                Rotate(),
+                Vibrato(),
+                Demons(),
                 Stop(),
                 ResetFilters(),
-                TiktokFavs()
+                TiktokFavs(),
+                Source()
             )
             .build()
 

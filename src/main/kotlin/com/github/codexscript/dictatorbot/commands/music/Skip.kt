@@ -15,7 +15,14 @@ class Skip : SlashCommand() {
             return
         }
 
-        event.reply("Skipped **${Bot.musicController.getGuildMusicManager(event.textChannel).scheduler.currentTrack?.info?.title}**").queue()
+        val title = Bot.musicController.getGuildMusicManager(event.textChannel).scheduler.currentTrack?.info?.title
+
+        if (title == null) {
+            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            return
+        }
+
+        event.reply("Skipped **${title}**").queue()
 
         Bot.musicController.getGuildMusicManager(event.textChannel).scheduler.nextTrack()
     }

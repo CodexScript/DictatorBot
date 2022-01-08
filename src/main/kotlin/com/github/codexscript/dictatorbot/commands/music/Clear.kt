@@ -15,6 +15,12 @@ class Clear : SlashCommand() {
         if (event == null) {
             return
         }
+
+        if (!Bot.musicController.isLinkActive(event.guild!!)) {
+            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            return
+        }
+
         Bot.musicController.clearQueue(event)
     }
 }
