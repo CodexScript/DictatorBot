@@ -3,13 +3,17 @@ package com.github.codexscript.dictatorbot.commands
 import com.github.codexscript.dictatorbot.util.SocialCreditManager
 import com.jagrosh.jdautilities.command.SlashCommand
 import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
+import net.dv8tion.jda.api.interactions.commands.OptionType
+import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import kotlin.concurrent.thread
 
 class SocialCredit : SlashCommand() {
     init {
         name = "socialcredit"
         help = "Tells you your social credit"
+        options = listOf(OptionData(OptionType.USER, "user", "The user to check the social credit of", false))
     }
 
     override fun execute(event: SlashCommandEvent?) {
@@ -29,9 +33,19 @@ class SocialCredit : SlashCommand() {
             return
         }
 
-        event.deferReply().queue()
+        val specifiedTarget = event.getOption("user")?.asMember
+
+        var user: Member?
+
+        if (specifiedTarget != null) {
+            user = specifiedTarget
+        } else {
+            user = event.member
+        }
+
+        event.deferReply().setEphemeral(true).queue()
         thread(start = true) {
-            val image = SocialCreditManager.createUserBanner(event.member!!)
+            val image = SocialCreditManager.createUserBanner(user!!)
 
             event.hook.sendFile(image, "socialcredit.png").queue()
         }

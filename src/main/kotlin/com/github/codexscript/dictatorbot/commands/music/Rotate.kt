@@ -2,6 +2,8 @@ package com.github.codexscript.dictatorbot.commands.music
 
 import com.github.codexscript.dictatorbot.Bot
 import com.github.codexscript.dictatorbot.models.WorkerOwnedSlashCommand
+import com.github.codexscript.dictatorbot.util.ConfigManager
+import com.github.codexscript.dictatorbot.util.SocialCreditManager
 import lavalink.client.io.filters.Rotation
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -25,7 +27,10 @@ class Rotate : WorkerOwnedSlashCommand() {
         }
 
         if (!Bot.musicController.isLinkActive(event.guild!!)) {
-            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            val config = ConfigManager.getConfigContent()
+            val penalty = config.invalidCommandPenalty * -1
+            event.reply("Nothing is playing. Waste of CCP resources. ${if (penalty < 0) penalty else "+$penalty"} social credit.").setEphemeral(true).queue()
+            SocialCreditManager.addSocialCredit(event.member!!.id, penalty)
             return
         }
 

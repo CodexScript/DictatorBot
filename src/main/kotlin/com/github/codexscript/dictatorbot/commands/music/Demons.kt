@@ -3,6 +3,8 @@ package com.github.codexscript.dictatorbot.commands.music
 import com.github.codexscript.dictatorbot.Bot
 import com.github.codexscript.dictatorbot.models.SocialCreditTier
 import com.github.codexscript.dictatorbot.models.WorkerOwnedSlashCommand
+import com.github.codexscript.dictatorbot.util.ConfigManager
+import com.github.codexscript.dictatorbot.util.SocialCreditManager
 import lavalink.client.io.filters.*
 import lavalink.client.io.filters.Vibrato
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
@@ -26,7 +28,10 @@ class Demons : WorkerOwnedSlashCommand() {
         }
 
         if (!Bot.musicController.isLinkActive(event.guild!!)) {
-            event.reply("Nothing is playing.").setEphemeral(true).queue()
+            val config = ConfigManager.getConfigContent()
+            val penalty = config.invalidCommandPenalty * -1
+            event.reply("Nothing is playing. Waste of CCP resources. ${if (penalty < 0) penalty else "+$penalty"} social credit.").setEphemeral(true).queue()
+            SocialCreditManager.addSocialCredit(event.member!!.id, penalty)
             return
         }
 

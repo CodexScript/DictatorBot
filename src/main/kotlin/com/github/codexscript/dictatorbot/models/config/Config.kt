@@ -5,6 +5,7 @@ data class Config(
     val ownerID: String,
     val socialCreditPhrases: Map<String, Int> = mapOf(),
     val socialCreditRegex: Map<String, Int> = mapOf(),
+    val invalidCommandPenalty: Int = 25,
     val lavalinkIP: String,
     val lavalinkPort: Int,
     val lavalinkPassword: String,

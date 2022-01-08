@@ -74,6 +74,14 @@ class SocialCreditManager {
             }
         }
 
+
+        /**
+         * @param event The event that triggered the social credit change.
+         * @param reasons A list of reasons for the change. An empty list will cause no message to be sent.
+         * @param socialCredit The new social credit score.
+         * @param reply Whether to reply to the event or not. A value of false will send the message to the channel the event was sent in.
+         *
+         */
         fun setSocialCredit(event: MessageReceivedEvent, reasons: List<String>, socialCredit: Int, reply: Boolean = true) {
             setSocialCredit(event.author.id, socialCredit)
 

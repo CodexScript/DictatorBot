@@ -44,11 +44,8 @@ class MessageEventSocialCredit : ListenerAdapter() {
         else {
             val dice = Random.nextInt(20)
             if (dice == 0) {
-                socialCreditNew = socialCredit + 1
-                reasons.clear()
-                reasons.add("Activity")
-                LOG.debug("${event.author.name} (${event.author.id}) social credit: $socialCredit -> $socialCreditNew")
-                SocialCreditManager.setSocialCredit(event, reasons, socialCreditNew, false)
+                LOG.debug("${event.author.name} (${event.author.id}) social credit: $socialCredit -> ${socialCredit + 1}")
+                SocialCreditManager.addSocialCredit(event.author.id, 1)
             }
         }
     }

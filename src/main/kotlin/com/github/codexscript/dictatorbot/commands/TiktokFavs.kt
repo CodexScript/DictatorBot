@@ -6,8 +6,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.codexscript.dictatorbot.models.SocialCreditTier
 import com.github.codexscript.dictatorbot.models.WorkerOwnedSlashCommand
+import com.github.codexscript.dictatorbot.models.config.TiktokConfig
 import com.github.codexscript.dictatorbot.models.tiktok.TiktokFavsResponse
-import com.github.codexscript.dictatorbot.models.tiktok.TiktokHashtag
 import com.github.codexscript.dictatorbot.models.tiktok.TiktokVideoListing
 import com.github.codexscript.dictatorbot.util.ConfigManager
 import net.dv8tion.jda.api.entities.Message
@@ -30,10 +30,6 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
 
     private var fetchTime = Date()
 
-    private val mapper = jacksonObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
-
-    private val config = ConfigManager.getConfigContent()
-
     init {
         name = "tiktokfavs"
         help = "Shows a random CCP-sponsored TikTok video."
@@ -53,6 +49,8 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
             return
         }
 
+        val config = ConfigManager.getConfigContent()
+
         if (config.tiktok == null) {
             event.reply("TikTok API key is not configured. Please contact the bot owner.").setEphemeral(true).queue()
             return
@@ -66,7 +64,7 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
             event.channel.sendMessage("Populating TikTok favorites list. This may take a minute...").queue {
                 waitMessage = it
             }
-            fetchFavorites(event.jda.httpClient)
+            fetchFavorites(event.jda.httpClient, config.tiktok)
             waitMessage?.delete()?.queue()
         }
 
@@ -113,6 +111,7 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
 
                 if (bytes != null) {
                     LOG.info("Sending TikTok video ${listing.shareInfo.shareURL}")
+                    val mapper = jacksonObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
                     LOG.debug(mapper.writeValueAsString(listing))
                     event.hook.editOriginal(bytes, "tiktok-$index.mp4").queue()
                     rewardScore(event, false)
@@ -130,12 +129,12 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
         }
     }
 
-    private fun isValidVideo(video: TiktokVideoListing): Boolean {
+    private fun isValidVideo(video: TiktokVideoListing, config: TiktokConfig): Boolean {
         var videoHashtagsValid = true
         var soundValid = true
 
-        val badSounds = config.tiktok?.badSounds
-        val badHashtags = config.tiktok?.badHashtags
+        val badSounds = config.badSounds
+        val badHashtags = config.badHashtags
 
         if (badHashtags != null && badHashtags.isNotEmpty() && video.textExtra != null) {
 
@@ -151,8 +150,11 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
         return videoHashtagsValid && soundValid
     }
 
-    private fun fetchFavorites(client: OkHttpClient) {
+    private fun fetchFavorites(client: OkHttpClient, config: TiktokConfig) {
         LOG.info("Fetching TikTok favorites list")
+
+        val mapper = jacksonObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
+
         fetchTime = Date()
         var cursor = 0
         var has_more = true
@@ -172,9 +174,9 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
 
             val headers = Headers.Builder()
                 .add("user-agent", "TikTok 16.6.5 rv:166515 (iPhone; iOS 14.0; en_US) Cronet")
-                .add("x-khronos", config.tiktok!!.xKhronos)
-                .add("x-gorgon", config.tiktok.xGorgon)
-                .add("cookie", config.tiktok.cookie)
+                .add("x-khronos", config.xKhronos)
+                .add("x-gorgon", config.xGorgon)
+                .add("cookie", config.cookie)
                 .build()
 
             val request = Request.Builder()
@@ -189,7 +191,7 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
                 val aweme_list = json.awemeList
                 //favs.addAll(aweme_list)
                 for (aweme in aweme_list) {
-                    if (aweme.canPlay && isValidVideo(aweme)) {
+                    if (aweme.canPlay && isValidVideo(aweme, config)) {
                         favs.add(aweme)
                     }
                 }
