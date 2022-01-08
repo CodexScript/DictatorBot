@@ -1,6 +1,7 @@
 package com.github.codexscript.dictatorbot.commands.music
 
 import com.github.codexscript.dictatorbot.Bot
+import com.github.codexscript.dictatorbot.models.SocialCreditTier
 import com.github.codexscript.dictatorbot.models.WorkerOwnedSlashCommand
 import lavalink.client.io.filters.*
 import lavalink.client.io.filters.Vibrato
@@ -11,6 +12,7 @@ class Demons : WorkerOwnedSlashCommand() {
     init {
         name = "demons"
         help = "Sets all filters to random values."
+        requiredTier = SocialCreditTier.APLUS
         reward = 1
     }
 

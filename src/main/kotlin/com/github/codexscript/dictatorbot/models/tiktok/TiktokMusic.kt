@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-class TiktokMusic(
+data class TiktokMusic(
     val avatarMedium: GenericTiktokMedia? = null,
     val collectStat: Int,
     val playUrl: GenericTiktokMedia,
@@ -43,11 +43,4 @@ class TiktokMusic(
     val isPgc: Boolean,
     val shootDuration: Int,
     val auditionDuration: Int,
-) {
-    override fun equals(other: Any?): Boolean {
-        if (other is TiktokMusic) {
-            return id == other.id
-        }
-        return super.equals(other)
-    }
-}
+)

@@ -28,11 +28,19 @@ class Help : SlashCommand() {
             |`/play` to play music
             |`/skip` to skip the current song
             |`/clear` to clear the queue
+            |`/stop` to stop the music
             |`/queue` to see the current queue
             |`/volume` to change the volume
+            |`/pitch` to change the pitch
+            |`/speed` to change the speed
+            |`/vibrato` to change the vibrato
+            |`/rotate` to change the rotation frequency
+            |`/resetfilters` to reset all filters
             |
             |__Other Commands__
             |Use `/soygrimes` to edit a given image to be behind the soy grimes picture
+            |Use `/tiktokfavs` to see TikTok videos sponsored by the CCP
+            |Use `/source` to see the source code of this bot
             |Use `/help` to see this message
         """.trimMargin()).setEphemeral(true).queue()
     }

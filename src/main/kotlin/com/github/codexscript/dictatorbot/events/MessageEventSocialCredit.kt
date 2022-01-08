@@ -5,6 +5,7 @@ import com.github.codexscript.dictatorbot.util.SocialCreditManager
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.slf4j.LoggerFactory
+import kotlin.random.Random
 
 class MessageEventSocialCredit : ListenerAdapter() {
     private val LOG = LoggerFactory.getLogger(MessageEventSocialCredit::class.java)
@@ -39,6 +40,16 @@ class MessageEventSocialCredit : ListenerAdapter() {
         if (socialCreditNew != socialCredit) {
             LOG.debug("${event.author.name} (${event.author.id}) social credit: $socialCredit -> $socialCreditNew")
             SocialCreditManager.setSocialCredit(event, reasons, socialCreditNew)
+        }
+        else {
+            val dice = Random.nextInt(20)
+            if (dice == 0) {
+                socialCreditNew = socialCredit + 1
+                reasons.clear()
+                reasons.add("Activity")
+                LOG.debug("${event.author.name} (${event.author.id}) social credit: $socialCredit -> $socialCreditNew")
+                SocialCreditManager.setSocialCredit(event, reasons, socialCreditNew, false)
+            }
         }
     }
 }

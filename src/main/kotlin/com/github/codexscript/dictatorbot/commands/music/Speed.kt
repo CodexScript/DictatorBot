@@ -11,7 +11,7 @@ class Speed : WorkerOwnedSlashCommand() {
     init {
         name = "speed"
         help = "Changes the playback speed."
-        options = listOf(OptionData(OptionType.INTEGER, "speed", "The new speed, in percentage.", true))
+        options = listOf(OptionData(OptionType.INTEGER, "speed", "The new speed, in percentage", true))
         reward = 1
     }
 

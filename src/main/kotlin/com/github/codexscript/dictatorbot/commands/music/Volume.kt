@@ -10,7 +10,7 @@ class Volume : SlashCommand() {
     init {
         name = "volume"
         help = "Changes the volume of the music player."
-        options = listOf(OptionData(OptionType.INTEGER, "volume", "The new volume level, in percentage.", true))
+        options = listOf(OptionData(OptionType.INTEGER, "volume", "The new volume level, in percentage", true))
     }
 
     override fun execute(event: SlashCommandEvent?) {

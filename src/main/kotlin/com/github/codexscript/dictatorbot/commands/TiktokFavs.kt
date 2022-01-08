@@ -34,18 +34,12 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
 
     private val config = ConfigManager.getConfigContent()
 
-    private lateinit var badHashtagObjects: List<TiktokHashtag>
-
     init {
         name = "tiktokfavs"
-        help = "Grabs a random video from a certain TikTok favorites list. Now family friendly*!"
+        help = "Shows a random CCP-sponsored TikTok video."
         options = listOf(OptionData(OptionType.INTEGER, "index", "The index of the video to grab.", false))
         requiredTier = SocialCreditTier.AMINUS
         reward = 10
-
-        if (config.tiktok?.badHashtags != null) {
-            badHashtagObjects = config.tiktok.badHashtags.map { TiktokHashtag(hashtagName = it) }
-        }
     }
 
     override fun execute(event: SlashCommandEvent?) {
@@ -141,13 +135,14 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
         var soundValid = true
 
         val badSounds = config.tiktok?.badSounds
+        val badHashtags = config.tiktok?.badHashtags
 
-        if (badHashtagObjects != null && badHashtagObjects.isNotEmpty() && video.textExtra != null) {
+        if (badHashtags != null && badHashtags.isNotEmpty() && video.textExtra != null) {
 
-            videoHashtagsValid = !video.textExtra.any(badHashtagObjects::contains)
+            videoHashtagsValid = !video.textExtra.any { it.hashtagName in badHashtags }
         }
 
-        if (badSounds != null) {
+        if (badSounds != null && badSounds.isNotEmpty()) {
             if (video.music?.id in badSounds) {
                 soundValid = false
             }

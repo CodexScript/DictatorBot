@@ -11,7 +11,7 @@ class Rotate : WorkerOwnedSlashCommand() {
     init {
         name = "rotate"
         help = "Rotates the sound (8D AUDIO XXXTENTACION!!1!1one1)."
-        options = listOf(OptionData(OptionType.NUMBER, "hz", "Rotation frequency.", true))
+        options = listOf(OptionData(OptionType.NUMBER, "hz", "Rotation frequency", true))
         reward = 1
     }
 

@@ -11,7 +11,7 @@ class Pitch : WorkerOwnedSlashCommand() {
     init {
         name = "pitch"
         help = "Changes the pitch of the music."
-        options = listOf(OptionData(OptionType.INTEGER, "pitch", "The new pitch, in percentage.", true))
+        options = listOf(OptionData(OptionType.INTEGER, "pitch", "The new pitch, in percentage", true))
         reward = 1
     }
 
