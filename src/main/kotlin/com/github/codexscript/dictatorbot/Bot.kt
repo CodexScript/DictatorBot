@@ -52,7 +52,6 @@ class Bot(token: String)  {
                 TiktokFavs(),
                 Source()
             )
-            .forceGuildOnly("272896244412579841")
             .build()
 
 
