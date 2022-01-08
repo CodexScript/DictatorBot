@@ -34,12 +34,18 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
 
     private val config = ConfigManager.getConfigContent()
 
+    private lateinit var badHashtagObjects: List<TiktokHashtag>
+
     init {
         name = "tiktokfavs"
         help = "Grabs a random video from a certain TikTok favorites list. Now family friendly*!"
         options = listOf(OptionData(OptionType.INTEGER, "index", "The index of the video to grab.", false))
         requiredTier = SocialCreditTier.AMINUS
         reward = 10
+
+        if (config.tiktok?.badHashtags != null) {
+            badHashtagObjects = config.tiktok.badHashtags.map { TiktokHashtag(hashtagName = it) }
+        }
     }
 
     override fun execute(event: SlashCommandEvent?) {
@@ -134,29 +140,17 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
         var videoHashtagsValid = true
         var soundValid = true
 
-        val badSounds = listOf(
-            "6823159626767305477",
-            "7017965562982697730" // Meghan Trainor - Title
-        )
+        val badSounds = config.tiktok?.badSounds
 
-        if (video.textExtra != null) {
-            val badHashtags = listOf(TiktokHashtag(hashtagName = "wap"),
-                TiktokHashtag(hashtagName = "kawaii"),
-                TiktokHashtag(hashtagName = "females"),
-                TiktokHashtag(hashtagName = "edit"),
-                TiktokHashtag(hashtagName = "waifu"),
-                TiktokHashtag(hashtagName = "hot"),
-                TiktokHashtag(hashtagName = "otaku"),
-                TiktokHashtag(hashtagName = "hentai"),
-                TiktokHashtag(hashtagName = "bimbo"),
-                TiktokHashtag(hashtagName = "bhaddie"),
-            )
+        if (badHashtagObjects != null && badHashtagObjects.isNotEmpty() && video.textExtra != null) {
 
-            videoHashtagsValid = !video.textExtra.any(badHashtags::contains)
+            videoHashtagsValid = !video.textExtra.any(badHashtagObjects::contains)
         }
 
-        if (video.music?.id in badSounds) {
-            soundValid = false
+        if (badSounds != null) {
+            if (video.music?.id in badSounds) {
+                soundValid = false
+            }
         }
 
         return videoHashtagsValid && soundValid
