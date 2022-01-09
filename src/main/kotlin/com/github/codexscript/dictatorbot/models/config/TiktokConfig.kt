@@ -5,5 +5,6 @@ data class TiktokConfig(
     val xGorgon: String,
     val cookie: String,
     val badSounds: List<String>? = null,
-    val badHashtags: List<String>? = null
+    val badHashtags: List<String>? = null,
+    val badAuthors: List<String>? = null
 )

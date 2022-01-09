@@ -48,4 +48,5 @@ data class TiktokVideoListing(
     val distance: String? = null,
     val createTime: Int = 0,
     val canPlay: Boolean = true,
+    val author: TiktokAuthor,
 )

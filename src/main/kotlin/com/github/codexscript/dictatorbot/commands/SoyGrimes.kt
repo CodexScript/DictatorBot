@@ -42,7 +42,7 @@ class SoyGrimes : WorkerOwnedSlashCommand() {
         event.deferReply().queue()
 
         try{
-            thread(start = true) {
+            thread(start = true, name = "SoyGrimes-GeneratorThread") {
                 val urlRequest = Request.Builder()
                     .url(URL(url))
                     .build()

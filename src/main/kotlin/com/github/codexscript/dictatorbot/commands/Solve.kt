@@ -183,7 +183,7 @@ class Solve : SlashCommand() {
 
                 event.deferReply().queue()
 
-                thread(start = true) {
+                thread(start = true, name="SolverThread") {
                     val driver = getDriver()
 
                     try {

@@ -2,6 +2,7 @@ package com.github.codexscript.dictatorbot.commands
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.codexscript.dictatorbot.models.SocialCreditTier
@@ -20,6 +21,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.slf4j.LoggerFactory
 import java.util.*
+import java.util.concurrent.Semaphore
+import kotlin.concurrent.thread
 import kotlin.random.Random
 
 class TiktokFavs : WorkerOwnedSlashCommand() {
@@ -29,6 +32,8 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
     private val LOG = LoggerFactory.getLogger(TiktokFavs::class.java)
 
     private var fetchTime = Date()
+
+    private val sem = Semaphore(1)
 
     init {
         name = "tiktokfavs"
@@ -60,61 +65,78 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
 
         event.deferReply().queue()
 
-        if (favs.isEmpty() || fetchTime.time + 21600000 < Date().time) {
-            event.channel.sendMessage("Populating TikTok favorites list. This may take a minute...").queue {
-                waitMessage = it
-            }
-            fetchFavorites(event.jda.httpClient, config.tiktok)
-            waitMessage?.delete()?.queue()
-        }
+        thread(start = true, name = "TikTokFavs-FetcherThread") {
+            val couldAquire = sem.tryAcquire()
 
-        val userIndex = event.getOption("index")?.asDouble?.toInt()
+            val shouldFetch = favs.isEmpty() || fetchTime.time + 21600000 < Date().time
 
-        var listing: TiktokVideoListing? = null
-        var index = Int.MIN_VALUE
-
-        if (userIndex == null) {
-            var size = Int.MAX_VALUE
-
-            while (size > 8000000) {
-                index = Random.nextInt(0, favs.size)
-                listing = favs[index]
-                size = listing.video?.playAddr?.dataSize ?: 0
-            }
-        }
-        else {
-            index = userIndex
-            if (index >= favs.size) {
-                event.hook.editOriginal("Index out of bounds")
-                return
-            }
-            if (index < 0) {
-                index += favs.size + 1
-                if (index < 0) {
-                    event.hook.editOriginal("Index out of bounds")
-                    return
+            if (!couldAquire || shouldFetch) {
+                event.channel.sendMessage("Populating TikTok favorites list. This may take a minute...").queue {
+                    waitMessage = it
                 }
             }
-            listing = favs[index]
-        }
 
-        if (listing?.video != null) {
-            val video = listing.video!!.playAddr
-            val videoCdnUrl = video?.urlList?.get(video.urlList.size - 1)
+            if (!couldAquire) {
+                sem.acquire()
+            }
 
-            if (videoCdnUrl != null) {
-                val dlRequest = Request.Builder()
-                    .url(videoCdnUrl)
-                    .build()
+            if (shouldFetch) {
+                fetchFavorites(event.jda.httpClient, config.tiktok)
+            }
 
-                val bytes = event.jda.httpClient.newCall(dlRequest).execute().body?.bytes()
+            waitMessage?.delete()?.queue()
 
-                if (bytes != null) {
-                    LOG.info("Sending TikTok video ${listing.shareInfo.shareURL}")
-                    val mapper = jacksonObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
-                    LOG.debug(mapper.writeValueAsString(listing))
-                    event.hook.editOriginal(bytes, "tiktok-$index.mp4").queue()
-                    rewardScore(event, false)
+            val userIndex = event.getOption("index")?.asDouble?.toInt()
+
+            var listing: TiktokVideoListing? = null
+            var index = Int.MIN_VALUE
+
+            if (userIndex == null) {
+                var size = Int.MAX_VALUE
+
+                while (size > 8000000) {
+                    index = Random.nextInt(0, favs.size)
+                    listing = favs[index]
+                    size = listing.video?.playAddr?.dataSize ?: 0
+                }
+            }
+            else {
+                index = userIndex
+                if (index >= favs.size) {
+                    event.hook.editOriginal("Index out of bounds")
+                    return@thread
+                }
+                if (index < 0) {
+                    index += favs.size + 1
+                    if (index < 0) {
+                        event.hook.editOriginal("Index out of bounds")
+                        return@thread
+                    }
+                }
+                listing = favs[index]
+            }
+
+            if (listing?.video != null) {
+                val video = listing.video!!.playAddr
+                val videoCdnUrl = video?.urlList?.get(video.urlList.size - 1)
+
+                if (videoCdnUrl != null) {
+                    val dlRequest = Request.Builder()
+                        .url(videoCdnUrl)
+                        .build()
+
+                    val bytes = event.jda.httpClient.newCall(dlRequest).execute().body?.bytes()
+
+                    if (bytes != null) {
+                        LOG.info("Sending TikTok video ${listing.shareInfo.shareURL}")
+                        val mapper = jacksonObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
+                        LOG.debug(mapper.writeValueAsString(listing))
+                        event.hook.editOriginal(bytes, "tiktok-$index.mp4").queue()
+                        rewardScore(event, false)
+                    }
+                    else {
+                        event.hook.editOriginal("Failed to download TikTok video.").queue()
+                    }
                 }
                 else {
                     event.hook.editOriginal("Failed to download TikTok video.").queue()
@@ -123,9 +145,7 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
             else {
                 event.hook.editOriginal("Failed to download TikTok video.").queue()
             }
-        }
-        else {
-            event.hook.editOriginal("Failed to download TikTok video.").queue()
+            sem.release()
         }
     }
 
@@ -135,6 +155,7 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
 
         val badSounds = config.badSounds
         val badHashtags = config.badHashtags
+        val badAuthors = config.badAuthors
 
         if (badHashtags != null && badHashtags.isNotEmpty() && video.textExtra != null) {
 
@@ -147,21 +168,29 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
             }
         }
 
+        if (badAuthors != null && badAuthors.isNotEmpty()) {
+            if (video.author.uniqueID in badAuthors) {
+                soundValid = false
+            }
+        }
+
         return videoHashtagsValid && soundValid
     }
 
     private fun fetchFavorites(client: OkHttpClient, config: TiktokConfig) {
         LOG.info("Fetching TikTok favorites list")
 
+        fetchTime = Date()
+
         val mapper = jacksonObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE).configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
 
-        fetchTime = Date()
+
         var cursor = 0
-        var has_more = true
+        var hasMore = true
 
         var iterated = 0
 
-        while(has_more && iterated < 500) {
+        while(hasMore && iterated < 500) {
             val url = HttpUrl.Builder()
                 .scheme("https")
                 .host("api19-normal-c-useast1a.tiktokv.com")
@@ -188,18 +217,23 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
             val body = response.body!!.string()
             try {
                 val json: TiktokFavsResponse = mapper.readValue(body)
-                val aweme_list = json.awemeList
+                val awemeList = json.awemeList
                 //favs.addAll(aweme_list)
-                for (aweme in aweme_list) {
+                for (aweme in awemeList) {
                     if (aweme.canPlay && isValidVideo(aweme, config)) {
                         favs.add(aweme)
                     }
                 }
-                has_more = json.hasMore == 1
+                hasMore = json.hasMore == 1
                 cursor = json.cursor
             }
             catch (e: Exception) {
                 LOG.error(body)
+                when (e) {
+                    is MissingKotlinParameterException -> {
+                        LOG.error(e.location.toString())
+                    }
+                }
                 throw e
             }
             finally {
@@ -207,11 +241,10 @@ class TiktokFavs : WorkerOwnedSlashCommand() {
             }
 
             val diff = 500 - iterated
-            if (diff < 30) {
-                iterated += diff
-            }
-            else {
-                iterated += 30
+            iterated += if (diff < 30) {
+                diff
+            } else {
+                30
             }
         }
         LOG.info("Fetched ${favs.size} TikTok favorites")
